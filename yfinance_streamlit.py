@@ -90,6 +90,7 @@ def fetch_company_desc(selected_company):
         st.error(f"Error fetching description: {e}")
         return None
 
+# Plot graph for date range analyser (need to integrate this into Single stock analysis)
 def plot_data(df, selected_column):
     plt.figure(figsize=(12, 6))
     plt.plot(df['Date'], df[selected_column], marker='o', linestyle='-')
@@ -105,6 +106,7 @@ def main():
     st.divider()
     conn = connect_to_db()
 
+    # Create sidebar to select different tools
     with st.sidebar:
         selected_tab = st.radio("Menu", ["Single stock analysis", "Stock comparison tool", "Date range analyser"])
     if selected_tab == "Single stock analysis":
@@ -134,12 +136,7 @@ def main():
                 st.dataframe(recent_df)
 
                 df = pd.DataFrame(company_data, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'])
-                plt.figure(figsize=(12, 6))
-                plt.plot(df['Date'], df[selected_column].values, marker='o', linestyle='-')
-                plt.title(f"{selected_column} Over time for {selected_company}")
-                plt.xlabel("Date")
-                plt.ylabel(selected_column)
-                plt.xticks(rotation=45)
+                plot_data(df, selected_column)
                 st.pyplot(plt)
             else:
                 st.warning("No data found in database, try another company.")
@@ -153,6 +150,7 @@ def main():
         st.header("Stock comparison tool")
         st.write("Please select at least two companies to compare their data with")
 
+        # Create dropdown to select companies
         selected_company1 = st.selectbox("Select Company 1", companies)
         selected_company2 = st.selectbox("Select Company 2", companies)
 
@@ -161,6 +159,7 @@ def main():
         company_data1 = fetch_company_data(conn, selected_company1)
         company_data2 = fetch_company_data(conn, selected_company2)
 
+        # Display data on a graph
         if company_data1 and company_data2:
             all_df1 = pd.DataFrame(company_data1, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'])
             all_df2 = pd.DataFrame(company_data2, columns=['Date', 'Open', 'High', 'Low', 'Close', 'Adj Close', 'Volume'])
@@ -193,6 +192,7 @@ def main():
             start_date = st.date_input("Start Date")
             end_date = st.date_input("End Date")
 
+            # Display data on graph
             if start_date <= end_date:
                 company_data = fetch_company_data_date(conn, selected_company, start_date, end_date)
                 if company_data:
